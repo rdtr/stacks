@@ -37,7 +37,7 @@ params:
     displayLogo: false
   editURL:
     enable: true
-    base: https://github.com/rdtr/internals/edit/main/content
+    base: https://github.com/rdtr/stacks/edit/main/content
   page:
     width: wide
 
@@ -55,6 +55,6 @@ menu:
         type: search
     - name: GitHub
       weight: 4
-      url: https://github.com/rdtr/internals
+      url: https://github.com/rdtr/stacks
       params:
         icon: github

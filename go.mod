@@ -1,4 +1,4 @@
-module github.com/rdtr/internals
+module github.com/rdtr/stacks
 
 go 1.27.2
 
