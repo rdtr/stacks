@@ -1,0 +1,60 @@
+baseURL: https://stack.rdtr.dev/
+title: Explore the Stack
+locale: en-US
+enableGitInfo: true
+enableRobotsTXT: true
+
+module:
+  imports:
+    - path: github.com/imfing/hextra
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+  highlight:
+    noClasses: false
+
+params:
+  # Versions the book currently tracks. A page whose `verified` front matter
+  # is behind these gets an "may be outdated" banner.
+  targets:
+    spark: v4.2.0
+
+  # Source repositories that the `src` shortcode links into.
+  repos:
+    spark: apache/spark
+    gluten: apache/gluten
+    velox: facebookincubator/velox
+    datafusion: apache/datafusion
+    comet: apache/datafusion-comet
+    duckdb: duckdb/duckdb
+    auron: apache/auron
+    bolt: bytedance/bolt
+
+  navbar:
+    displayTitle: true
+    displayLogo: false
+  editURL:
+    enable: true
+    base: https://github.com/rdtr/internals/edit/main/content
+  page:
+    width: wide
+
+menu:
+  main:
+    - name: Apache Spark
+      pageRef: /spark
+      weight: 1
+    - name: Techniques
+      pageRef: /techniques
+      weight: 2
+    - name: Search
+      weight: 3
+      params:
+        type: search
+    - name: GitHub
+      weight: 4
+      url: https://github.com/rdtr/internals
+      params:
+        icon: github

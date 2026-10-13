@@ -1,0 +1,18 @@
+{{- /* Show which versions this page was verified against, and flag pages
+       that lag behind the versions the book currently tracks. */ -}}
+{{- with .Params.verified -}}
+  {{- $outdated := slice -}}
+  {{- $parts := slice -}}
+  {{- range $repo, $ver := . -}}
+    {{- $parts = $parts | append (printf "%s %s" $repo $ver) -}}
+    {{- $target := index site.Params.targets $repo -}}
+    {{- if and $target (ne $target $ver) -}}
+      {{- $outdated = $outdated | append (printf "%s %s (verified against %s)" $repo $target $ver) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if $outdated -}}
+    <div class="verified-banner verified-outdated">Not yet re-verified for {{ delimit $outdated ", " }}. Details may be out of date.</div>
+  {{- else -}}
+    <div class="verified-banner">Verified against {{ delimit $parts ", " }}</div>
+  {{- end -}}
+{{- end -}}

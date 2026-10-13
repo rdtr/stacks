@@ -1,0 +1,70 @@
+{{- /*
+  Link to a source file at the version this page was verified against.
+
+    {{< src repo="spark" path="sql/.../Expression.scala" anchor="def eval(input: InternalRow" />}}
+    {{< src repo="spark" path="..." anchor="..." span="5" >}}Expression.eval{{< /src >}}
+
+  repo:   key into site.Params.repos (spark, gluten, velox, ...)
+  path:   file path inside that repository
+  anchor: text on the target line; the first line that contains it wins.
+          Line numbers are never written by hand, so links survive version
+          upgrades. A missing or ambiguous anchor is reported at build time.
+  span:   optional number of extra lines to highlight after the anchor line
+  ref:    optional git ref that overrides the page's verified version
+*/ -}}
+{{- $repo := .Get "repo" -}}
+{{- $path := .Get "path" -}}
+{{- $anchor := .Get "anchor" -}}
+{{- $span := int (.Get "span" | default "0") -}}
+{{- $slug := index site.Params.repos $repo -}}
+{{- if not $slug -}}
+  {{- errorf "src: unknown repo %q in %s" $repo .Position -}}
+{{- end -}}
+{{- $ref := .Get "ref" -}}
+{{- if not $ref -}}
+  {{- with .Page.Params.verified -}}{{- $ref = index . $repo -}}{{- end -}}
+{{- end -}}
+{{- $ref = $ref | default (index site.Params.targets $repo) -}}
+{{- if not $ref -}}
+  {{- errorf "src: no version for repo %q in %s; set verified.%s in front matter or params.targets.%s" $repo .Position $repo $repo -}}
+{{- end -}}
+
+{{- $line := 0 -}}
+{{- $matches := 0 -}}
+{{- if $anchor -}}
+  {{- $raw := printf "https://raw.githubusercontent.com/%s/%s/%s" $slug $ref $path -}}
+  {{- with try (resources.GetRemote $raw) -}}
+    {{- with .Err -}}
+      {{- warnf "src: cannot fetch %s (%s) in %s" $raw . $.Position -}}
+    {{- else with .Value -}}
+      {{- range $i, $l := split .Content "\n" -}}
+        {{- if strings.Contains $l $anchor -}}
+          {{- $matches = add $matches 1 -}}
+          {{- if eq $line 0 }}{{ $line = add $i 1 }}{{ end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if eq $matches 0 -}}
+        {{- warnf "src: anchor %q not found in %s@%s:%s (%s)" $anchor $repo $ref $path $.Position -}}
+      {{- else if gt $matches 1 -}}
+        {{- warnf "src: anchor %q matches %d lines in %s@%s:%s; using the first (%s)" $anchor $matches $repo $ref $path $.Position -}}
+      {{- end -}}
+    {{- else -}}
+      {{- warnf "src: %s not found (%s)" $raw $.Position -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $url := printf "https://github.com/%s/blob/%s/%s" $slug $ref $path -}}
+{{- $label := path.Base $path -}}
+{{- if gt $line 0 -}}
+  {{- if gt $span 0 -}}
+    {{- $url = printf "%s#L%d-L%d" $url $line (add $line $span) -}}
+  {{- else -}}
+    {{- $url = printf "%s#L%d" $url $line -}}
+  {{- end -}}
+  {{- $label = printf "%s:%d" $label $line -}}
+{{- end -}}
+{{- $text := printf "<code>%s</code>" $label | safeHTML -}}
+{{- with .Inner }}{{ $text = . | $.Page.RenderString }}{{ end -}}
+<a class="src-link{{ if and $anchor (eq $line 0) }} src-link-broken{{ end }}" href="{{ $url }}" title="{{ $repo }} {{ $ref }} · {{ $path }}">{{ $text }}</a>
+{{- /* trim */ -}}
